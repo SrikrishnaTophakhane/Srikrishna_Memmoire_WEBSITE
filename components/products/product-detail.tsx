@@ -112,6 +112,7 @@ export function ProductDetail({ product, variants }: ProductDetailProps) {
         mockup_url: mockupUrl || currentProductImage,
         quantity: 1,
         unit_price: selectedVariant.price / 100,
+        design_config: designPosition,
       })
 
       if (error) throw error

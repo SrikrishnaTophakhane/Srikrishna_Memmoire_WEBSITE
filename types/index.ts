@@ -33,6 +33,11 @@ export interface CartItem {
   mockup_url?: string
   quantity: number
   unit_price: number
+  design_config?: {
+    x: number
+    y: number
+    scale: number
+  }
 }
 
 export interface Order {
@@ -69,6 +74,11 @@ export interface OrderItem {
   mockup_url?: string
   quantity: number
   unit_price: number
+  design_config?: {
+    x: number
+    y: number
+    scale: number
+  }
 }
 
 export interface ProductCategory {

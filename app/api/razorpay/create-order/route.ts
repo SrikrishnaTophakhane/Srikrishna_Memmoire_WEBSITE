@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
       mockup_url: item.mockup_url,
       quantity: item.quantity,
       unit_price: item.unit_price,
+      design_config: item.design_config,
     }))
 
     const { error: itemsError } = await supabase.from("order_items").insert(orderItems)

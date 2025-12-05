@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
       mockup_url,
       quantity,
       unit_price,
+      design_config,
     } = body
 
     const { data, error } = await supabase
@@ -70,6 +71,7 @@ export async function POST(request: NextRequest) {
         mockup_url,
         quantity: quantity || 1,
         unit_price,
+        design_config,
       })
       .select()
       .single()
