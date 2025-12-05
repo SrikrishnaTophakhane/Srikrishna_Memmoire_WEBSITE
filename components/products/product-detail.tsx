@@ -53,7 +53,7 @@ export function ProductDetail({ product, variants }: ProductDetailProps) {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0])
   const [designUrl, setDesignUrl] = useState<string | null>(null)
   const [mockupUrl, setMockupUrl] = useState<string | null>(null)
-  const [designPosition, setDesignPosition] = useState({ x: 50, y: 50, scale: 100 })
+  const [designPosition, setDesignPosition] = useState({ x: 0, y: 0, scale: 100 })
   const [isAddingToCart, setIsAddingToCart] = useState(false)
   const [user, setUser] = useState<{ id: string } | null>(null)
 
@@ -178,7 +178,7 @@ export function ProductDetail({ product, variants }: ProductDetailProps) {
                   </div>
                   <div className="text-sm text-muted-foreground">
                     <p>
-                      Position: {Math.round(designPosition.x)}%, {Math.round(designPosition.y)}%
+                      Offset: {Math.round(designPosition.x)}%, {Math.round(designPosition.y)}%
                     </p>
                     <p>Scale: {designPosition.scale}%</p>
                   </div>

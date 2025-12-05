@@ -33,15 +33,22 @@ export function ProductMockupPreview({
   onDesignPositionChange,
 }: ProductMockupPreviewProps) {
   const [scale, setScale] = useState(100)
-  const [position, setPosition] = useState({ x: 50, y: 50 })
+  const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  const dragStartRef = useRef({ startX: 0, startY: 0, initialOffsetX: 0, initialOffsetY: 0 })
 
   const designArea = DESIGN_AREAS[productType] || DESIGN_AREAS["T-SHIRT"]
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!designImage) return
     setIsDragging(true)
+    dragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialOffsetX: position.x,
+      initialOffsetY: position.y,
+    }
     e.preventDefault()
   }
 
@@ -49,12 +56,12 @@ export function ProductMockupPreview({
     if (!isDragging || !containerRef.current) return
 
     const rect = containerRef.current.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
+    const deltaX = ((e.clientX - dragStartRef.current.startX) / rect.width) * 100
+    const deltaY = ((e.clientY - dragStartRef.current.startY) / rect.height) * 100
 
     const newPosition = {
-      x: Math.max(20, Math.min(80, x)),
-      y: Math.max(20, Math.min(80, y)),
+      x: Math.max(-50, Math.min(50, dragStartRef.current.initialOffsetX + deltaX)),
+      y: Math.max(-50, Math.min(50, dragStartRef.current.initialOffsetY + deltaY)),
     }
     setPosition(newPosition)
     onDesignPositionChange?.({ ...newPosition, scale })
@@ -67,6 +74,13 @@ export function ProductMockupPreview({
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!designImage) return
     setIsDragging(true)
+    const touch = e.touches[0]
+    dragStartRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      initialOffsetX: position.x,
+      initialOffsetY: position.y,
+    }
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -74,12 +88,12 @@ export function ProductMockupPreview({
 
     const touch = e.touches[0]
     const rect = containerRef.current.getBoundingClientRect()
-    const x = ((touch.clientX - rect.left) / rect.width) * 100
-    const y = ((touch.clientY - rect.top) / rect.height) * 100
+    const deltaX = ((touch.clientX - dragStartRef.current.startX) / rect.width) * 100
+    const deltaY = ((touch.clientY - dragStartRef.current.startY) / rect.height) * 100
 
     const newPosition = {
-      x: Math.max(20, Math.min(80, x)),
-      y: Math.max(20, Math.min(80, y)),
+      x: Math.max(-50, Math.min(50, dragStartRef.current.initialOffsetX + deltaX)),
+      y: Math.max(-50, Math.min(50, dragStartRef.current.initialOffsetY + deltaY)),
     }
     setPosition(newPosition)
     onDesignPositionChange?.({ ...newPosition, scale })
@@ -90,9 +104,9 @@ export function ProductMockupPreview({
   }
 
   const resetPosition = () => {
-    setPosition({ x: 50, y: 50 })
+    setPosition({ x: 0, y: 0 })
     setScale(100)
-    onDesignPositionChange?.({ x: 50, y: 50, scale: 100 })
+    onDesignPositionChange?.({ x: 0, y: 0, scale: 100 })
   }
 
   const handleScaleChange = (value: number) => {
@@ -140,7 +154,7 @@ export function ProductMockupPreview({
                 <div
                   className="relative h-full w-full"
                   style={{
-                    transform: `translate(${(position.x - 50) * 0.5}%, ${(position.y - 50) * 0.5}%) scale(${scale / 100})`,
+                    transform: `translate(${position.x}%, ${position.y}%) scale(${scale / 100})`,
                   }}
                 >
                   <img
