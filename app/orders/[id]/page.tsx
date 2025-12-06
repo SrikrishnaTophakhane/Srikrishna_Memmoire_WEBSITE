@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { ChevronLeft, Package, Truck, MapPin, CreditCard, ExternalLink } from "lucide-react"
+import { CancelButton } from "@/components/orders/cancel-button"
+import { ChevronLeft, Package, Truck, MapPin, CreditCard, ExternalLink, Banknote } from "lucide-react"
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -111,9 +112,12 @@ export default async function OrderDetailPage({
           <h1 className="text-3xl font-bold">{order.order_number}</h1>
           <p className="text-muted-foreground">Placed on {formatDate(order.created_at)}</p>
         </div>
-        <Badge className={`${getStatusColor(order.status)} px-4 py-2 text-sm`}>
-          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-        </Badge>
+        <div className="flex items-center gap-4">
+          <CancelButton orderId={order.id} currentStatus={order.status} />
+          <Badge className={`${getStatusColor(order.status)} px-4 py-2 text-sm`}>
+            {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+          </Badge>
+        </div>
       </div>
 
       {/* Order Progress */}
@@ -250,6 +254,18 @@ export default async function OrderDetailPage({
               <div className="flex justify-between font-semibold">
                 <span>Total</span>
                 <span>₹{order.total_amount.toFixed(0)}</span>
+              </div>
+
+              <Separator className="my-2" />
+
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  {order.payment_method === "cod" ? <Banknote className="h-4 w-4" /> : <CreditCard className="h-4 w-4" />}
+                  Payment Method
+                </span>
+                <span className="font-medium">
+                  {order.payment_method === "cod" ? "Cash on Delivery" : "Online Payment"}
+                </span>
               </div>
 
               {order.razorpay_payment_id && (
