@@ -77,15 +77,6 @@ export function ProductDetail({ product, variants }: ProductDetailProps) {
       return
     }
 
-    if (!designUrl) {
-      toast({
-        title: "Design required",
-        description: "Please upload a design first",
-        variant: "destructive",
-      })
-      return
-    }
-
     if (!selectedVariant) {
       toast({
         title: "Selection required",
@@ -109,7 +100,7 @@ export function ProductDetail({ product, variants }: ProductDetailProps) {
         color: selectedColor,
         size: selectedSize,
         design_url: designUrl,
-        mockup_url: mockupUrl || currentProductImage,
+        mockup_url: mockupUrl || (designUrl ? currentProductImage : null),
         quantity: 1,
         unit_price: selectedVariant.price / 100,
         design_config: designPosition,
@@ -281,7 +272,7 @@ export function ProductDetail({ product, variants }: ProductDetailProps) {
           <Separator />
 
           {/* Add to Cart */}
-          <Button size="lg" className="w-full" onClick={handleAddToCart} disabled={isAddingToCart || !designUrl}>
+          <Button size="lg" className="w-full" onClick={handleAddToCart} disabled={isAddingToCart}>
             {isAddingToCart ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -295,12 +286,6 @@ export function ProductDetail({ product, variants }: ProductDetailProps) {
               </>
             )}
           </Button>
-
-          {!designUrl && (
-            <p className="text-center text-sm text-muted-foreground">
-              Please upload a design to add this product to your cart
-            </p>
-          )}
         </div>
       </div>
     </div>

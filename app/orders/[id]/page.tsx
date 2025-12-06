@@ -204,11 +204,17 @@ export default async function OrderDetailPage({
                   <div key={item.id}>
                     <div className="flex gap-4">
                       <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
-                        <img
-                          src={item.mockup_url || item.design_url || "/placeholder.svg"}
-                          alt={item.product_name}
-                          className="h-full w-full object-cover"
-                        />
+                         {item.mockup_url || item.design_url ? (
+                          <img
+                            src={item.mockup_url || item.design_url || "/placeholder.svg"}
+                            alt={item.product_name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-secondary">
+                             <Package className="h-8 w-8 text-muted-foreground opacity-50" />
+                          </div>
+                        )}
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium">{item.product_name}</h3>

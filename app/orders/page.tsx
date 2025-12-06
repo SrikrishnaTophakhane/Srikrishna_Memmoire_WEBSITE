@@ -112,11 +112,17 @@ export default async function OrdersPage() {
                         ?.slice(0, 3)
                         .map((item: { id: string; mockup_url?: string; design_url?: string; product_name: string }) => (
                           <div key={item.id} className="h-12 w-12 overflow-hidden rounded bg-muted">
-                            <img
-                              src={item.mockup_url || item.design_url || "/placeholder.svg"}
-                              alt={item.product_name}
-                              className="h-full w-full object-cover"
-                            />
+                             {item.mockup_url || item.design_url ? (
+                              <img
+                                src={item.mockup_url || item.design_url || "/placeholder.svg"}
+                                alt={item.product_name}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-secondary">
+                                <Package className="h-6 w-6 text-muted-foreground opacity-50" />
+                              </div>
+                            )}
                           </div>
                         ))}
                       {order.order_items && order.order_items.length > 3 && (

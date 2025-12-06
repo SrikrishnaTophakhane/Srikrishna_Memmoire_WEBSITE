@@ -429,11 +429,17 @@ export function CheckoutForm({ cartItems, addresses, user }: CheckoutFormProps) 
               {cartItems.map((item) => (
                 <div key={item.id} className="flex gap-4">
                   <div className="h-16 w-16 shrink-0 overflow-hidden rounded bg-muted">
-                    <img
-                      src={item.mockup_url || item.design_url || "/placeholder.svg"}
-                      alt={item.product_name}
-                      className="h-full w-full object-cover"
-                    />
+                    {item.mockup_url || item.design_url ? (
+                      <img
+                        src={item.mockup_url || item.design_url || "/placeholder.svg"}
+                        alt={item.product_name}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-secondary">
+                        <div className="h-8 w-8 rounded-full bg-muted-foreground/20" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="font-medium line-clamp-1">{item.product_name}</p>

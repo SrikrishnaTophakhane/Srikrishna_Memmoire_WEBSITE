@@ -16,15 +16,15 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
     <div className="flex gap-4">
       {/* Product Image with Design */}
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted">
-        {item.mockup_url ? (
+        {item.mockup_url || item.design_url ? (
           <img
-            src={item.mockup_url || "/placeholder.svg"}
+            src={item.mockup_url || item.design_url || "/placeholder.svg"}
             alt={item.product_name}
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <img src={item.design_url || "/placeholder.svg"} alt="Your design" className="h-16 w-16 object-contain" />
+          <div className="flex h-full w-full items-center justify-center bg-secondary">
+             <img src="/placeholder.svg" alt={item.product_name} className="h-12 w-12 opacity-50" />
           </div>
         )}
       </div>
