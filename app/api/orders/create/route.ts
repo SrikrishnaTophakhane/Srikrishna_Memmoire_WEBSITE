@@ -5,8 +5,6 @@ import { nanoid } from "nanoid"
 
 export async function POST(request: NextRequest) {
   try {
-    const razorpay = getRazorpay()
-
     const supabase = await createClient()
     const {
       data: { user },
@@ -17,7 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { amount, currency, shippingAddress } = await request.json()
+    const { amount, currency, shippingAddress, paymentMethod } = await request.json()
 
     if (!amount || !shippingAddress) {
       return NextResponse.json({ error: "Amount and shipping address are required" }, { status: 400 })
@@ -39,19 +37,24 @@ export async function POST(request: NextRequest) {
     // Generate order number
     const orderNumber = `POD-${Date.now()}-${nanoid(6).toUpperCase()}`
 
-    // Create internal order (pending payment)
+    // Determine initial status based on payment method
+    const initialStatus = paymentMethod === "cod" ? "processing" : "pending"
+    const selectedPaymentMethod = paymentMethod === "cod" ? "cod" : "razorpay"
+
+    // Create internal order
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({
         user_id: user.id,
         order_number: orderNumber,
-        status: "pending",
+        status: initialStatus,
         subtotal,
         shipping_cost: shipping,
         tax,
         total_amount: total,
         currency: currency || "INR",
         shipping_address: shippingAddress,
+        payment_method: selectedPaymentMethod,
       })
       .select()
       .single()
@@ -83,7 +86,23 @@ export async function POST(request: NextRequest) {
       console.error("Order items creation error:", itemsError)
     }
 
-    // Create Razorpay order
+    // Handle COD specific logic
+    if (selectedPaymentMethod === "cod") {
+      // Clear cart
+      await supabase.from("cart_items").delete().eq("user_id", user.id)
+
+      return NextResponse.json({
+        orderId: order.id, // Internal order ID
+        internalOrderId: order.id,
+        orderNumber,
+        amount: total * 100,
+        currency: currency || "INR",
+        paymentMethod: "cod",
+      })
+    }
+
+    // Handle Razorpay specific logic
+    const razorpay = getRazorpay()
     const razorpayOrder = await razorpay.orders.create({
       amount, // Amount in paise
       currency: currency || "INR",
@@ -103,9 +122,10 @@ export async function POST(request: NextRequest) {
       orderNumber,
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
+      paymentMethod: "razorpay",
     })
   } catch (error) {
-    console.error("Razorpay order creation error:", error)
-    return NextResponse.json({ error: "Failed to create payment order" }, { status: 500 })
+    console.error("Order creation error:", error)
+    return NextResponse.json({ error: "Failed to create order" }, { status: 500 })
   }
 }

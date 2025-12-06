@@ -97,6 +97,7 @@ export function CheckoutForm({ cartItems, addresses, user }: CheckoutFormProps) 
   const { toast } = useToast()
   const [isProcessing, setIsProcessing] = useState(false)
   const [razorpayKeyId, setRazorpayKeyId] = useState<string | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod">("razorpay")
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     addresses.find((a) => a.is_default)?.id || addresses[0]?.id || null,
   )
@@ -133,8 +134,8 @@ export function CheckoutForm({ cartItems, addresses, user }: CheckoutFormProps) 
   const tax = Math.round(subtotal * 0.18) // 18% GST
   const total = subtotal + shipping + tax
 
-  async function handlePayment() {
-    if (!razorpayKeyId) {
+  async function handlePlaceOrder() {
+    if (paymentMethod === "razorpay" && !razorpayKeyId) {
       toast({
         title: "Error",
         description: "Payment system not ready. Please try again.",
@@ -185,14 +186,15 @@ export function CheckoutForm({ cartItems, addresses, user }: CheckoutFormProps) 
         shippingAddress = addresses.find((a) => a.id === selectedAddressId)!
       }
 
-      // Create Razorpay order
-      const orderResponse = await fetch("/api/razorpay/create-order", {
+      // Create order
+      const orderResponse = await fetch("/api/orders/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           amount: Math.round(total * 100), // Amount in paise
           currency: "INR",
           shippingAddress,
+          paymentMethod,
         }),
       })
 
@@ -200,17 +202,28 @@ export function CheckoutForm({ cartItems, addresses, user }: CheckoutFormProps) 
         throw new Error("Failed to create order")
       }
 
-      const { orderId, internalOrderId } = await orderResponse.json()
+      const responseData = await orderResponse.json()
 
+      if (paymentMethod === "cod") {
+        toast({
+          title: "Order Placed",
+          description: "Your order has been placed successfully!",
+        })
+        router.push(`/orders/${responseData.internalOrderId}`)
+        return
+      }
+
+      // Handle Razorpay payment
+      const { orderId, internalOrderId } = responseData
       const options: RazorpayOptions = {
-        key: razorpayKeyId,
+        key: razorpayKeyId!,
         amount: Math.round(total * 100),
         currency: "INR",
         name: "Memmoire",
         description: "Custom Print on Demand Order",
         order_id: orderId,
         handler: async (response: RazorpayResponse) => {
-          // Verify payment and create order
+          // Verify payment
           try {
             const verifyResponse = await fetch("/api/razorpay/verify-payment", {
               method: "POST",
@@ -268,10 +281,10 @@ export function CheckoutForm({ cartItems, addresses, user }: CheckoutFormProps) 
       })
       razorpay.open()
     } catch (error) {
-      console.error("Payment error:", error)
+      console.error("Order error:", error)
       toast({
-        title: "Payment Error",
-        description: "Failed to initiate payment. Please try again.",
+        title: "Order Error",
+        description: "Failed to place order. Please try again.",
         variant: "destructive",
       })
       setIsProcessing(false)
@@ -460,11 +473,41 @@ export function CheckoutForm({ cartItems, addresses, user }: CheckoutFormProps) 
                 <span>₹{total.toFixed(0)}</span>
               </div>
 
-              <Button size="lg" className="w-full" onClick={handlePayment} disabled={isProcessing || !razorpayKeyId}>
+              <div className="space-y-4 pt-4">
+                <Label>Payment Method</Label>
+                <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as "razorpay" | "cod")}>
+                  <div className="flex items-center space-x-3 rounded-lg border p-4">
+                    <RadioGroupItem value="razorpay" id="razorpay" />
+                    <Label htmlFor="razorpay" className="flex-1 cursor-pointer font-medium">
+                      Online Payment (Razorpay)
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-3 rounded-lg border p-4">
+                    <RadioGroupItem value="cod" id="cod" />
+                    <Label htmlFor="cod" className="flex-1 cursor-pointer font-medium">
+                      Cash on Delivery
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              <Separator />
+
+              <Button
+                size="lg"
+                className="w-full"
+                onClick={handlePlaceOrder}
+                disabled={isProcessing || (paymentMethod === "razorpay" && !razorpayKeyId)}
+              >
                 {isProcessing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Processing...
+                  </>
+                ) : paymentMethod === "cod" ? (
+                  <>
+                    <Package className="mr-2 h-4 w-4" />
+                    Place Order (COD)
                   </>
                 ) : (
                   <>
@@ -474,10 +517,12 @@ export function CheckoutForm({ cartItems, addresses, user }: CheckoutFormProps) 
                 )}
               </Button>
 
-              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-                <Shield className="h-4 w-4" />
-                <span>Secured by Razorpay</span>
-              </div>
+              {paymentMethod === "razorpay" && (
+                <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                  <Shield className="h-4 w-4" />
+                  <span>Secured by Razorpay</span>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
