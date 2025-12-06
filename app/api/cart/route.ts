@@ -68,10 +68,10 @@ export async function POST(request: NextRequest) {
         color,
         size,
         design_url: design_url || null,
-        mockup_url,
+        mockup_url: mockup_url || null,
         quantity: quantity || 1,
         unit_price,
-        design_config,
+        design_config: design_url ? design_config : null,
       })
       .select()
       .single()
@@ -83,6 +83,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ item: data })
   } catch (error) {
     console.error("Cart add error:", error)
+    // Log specific database error if available
+    if (typeof error === "object" && error !== null && "message" in error) {
+      console.error("Detailed error message:", (error as any).message)
+      if ("details" in error) console.error("Error details:", (error as any).details)
+      if ("hint" in error) console.error("Error hint:", (error as any).hint)
+      if ("code" in error) console.error("Error code:", (error as any).code)
+    }
     return NextResponse.json({ error: "Failed to add item to cart" }, { status: 500 })
   }
 }

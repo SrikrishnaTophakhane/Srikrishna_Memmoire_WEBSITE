@@ -18,7 +18,7 @@ export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
 
   return (
     <div className="flex gap-4">
-      {/* Product Image with Design */}
+      {/* Product Image with Design or Fallback to Base Product */}
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted">
         <img
           src={item.mockup_url || item.design_url || productImage || "/placeholder.svg"}
