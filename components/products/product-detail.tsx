@@ -103,7 +103,7 @@ export function ProductDetail({ product, variants }: ProductDetailProps) {
         mockup_url: mockupUrl || null,
         quantity: 1,
         unit_price: selectedVariant.price / 100,
-        design_config: designPosition,
+        design_config: designUrl ? designPosition : null,
       })
 
       if (error) throw error
@@ -115,6 +115,14 @@ export function ProductDetail({ product, variants }: ProductDetailProps) {
       router.refresh()
     } catch (error) {
       console.error("Add to cart error:", error)
+      // Log specific database error if available
+      if (typeof error === "object" && error !== null && "message" in error) {
+        console.error("Detailed error message:", (error as any).message)
+        if ("details" in error) console.error("Error details:", (error as any).details)
+        if ("hint" in error) console.error("Error hint:", (error as any).hint)
+        if ("code" in error) console.error("Error code:", (error as any).code)
+      }
+
       toast({
         title: "Error",
         description: "Failed to add to cart. Please try again.",

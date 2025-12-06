@@ -122,13 +122,14 @@ export default async function OrdersPage() {
                           const product = getProductById(item.printful_product_id)
                           const productImage = product?.colorImages?.[item.color || ""] || product?.image
                           return (
-                          <div key={item.id} className="h-12 w-12 overflow-hidden rounded bg-muted">
-                            <img
-                              src={item.mockup_url || item.design_url || productImage || "/placeholder.svg"}
-                              alt={item.product_name}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
+                            <div key={item.id} className="h-12 w-12 overflow-hidden rounded bg-muted">
+                              <img
+                                src={item.mockup_url || item.design_url || productImage || "/placeholder.svg"}
+                                alt={item.product_name}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          )
                         )})}
                       {order.order_items && order.order_items.length > 3 && (
                         <div className="flex h-12 w-12 items-center justify-center rounded bg-muted text-sm font-medium">
