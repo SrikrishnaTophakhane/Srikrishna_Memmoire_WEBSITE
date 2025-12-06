@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Package, ChevronRight, ShoppingBag } from "lucide-react"
+import { getProductById } from "@/lib/products-data"
 
 export const metadata = {
   title: "My Orders | Memmoire",
@@ -110,15 +111,25 @@ export default async function OrdersPage() {
                     <div className="flex items-center gap-2">
                       {order.order_items
                         ?.slice(0, 3)
-                        .map((item: { id: string; mockup_url?: string; design_url?: string; product_name: string }) => (
+                        .map((item: {
+                          id: string;
+                          mockup_url?: string;
+                          design_url?: string;
+                          product_name: string;
+                          printful_product_id: number;
+                          color?: string;
+                        }) => {
+                          const product = getProductById(item.printful_product_id)
+                          const productImage = product?.colorImages?.[item.color || ""] || product?.image
+                          return (
                           <div key={item.id} className="h-12 w-12 overflow-hidden rounded bg-muted">
                             <img
-                              src={item.mockup_url || item.design_url || "/placeholder.svg"}
+                              src={item.mockup_url || item.design_url || productImage || "/placeholder.svg"}
                               alt={item.product_name}
                               className="h-full w-full object-cover"
                             />
                           </div>
-                        ))}
+                        )})}
                       {order.order_items && order.order_items.length > 3 && (
                         <div className="flex h-12 w-12 items-center justify-center rounded bg-muted text-sm font-medium">
                           +{order.order_items.length - 3}

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Minus, Plus, Trash2 } from "lucide-react"
 import type { CartItem as CartItemType } from "@/types"
+import { getProductById } from "@/lib/products-data"
 
 interface CartItemProps {
   item: CartItemType
@@ -12,21 +13,18 @@ interface CartItemProps {
 }
 
 export function CartItem({ item, onUpdateQuantity, onRemove }: CartItemProps) {
+  const product = getProductById(item.printful_product_id)
+  const productImage = product?.colorImages?.[item.color || ""] || product?.image
+
   return (
     <div className="flex gap-4">
       {/* Product Image with Design */}
       <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted">
-        {item.mockup_url ? (
-          <img
-            src={item.mockup_url || "/placeholder.svg"}
-            alt={item.product_name}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <img src={item.design_url || "/placeholder.svg"} alt="Your design" className="h-16 w-16 object-contain" />
-          </div>
-        )}
+        <img
+          src={item.mockup_url || item.design_url || productImage || "/placeholder.svg"}
+          alt={item.product_name}
+          className="h-full w-full object-cover"
+        />
       </div>
 
       {/* Item Details */}

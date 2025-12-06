@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
         variant_name,
         color,
         size,
-        design_url,
+        design_url: design_url || null,
         mockup_url,
         quantity: quantity || 1,
         unit_price,
